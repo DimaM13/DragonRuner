@@ -5,16 +5,16 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    public float movementSpeed = 3;
-    public float jumpForce = 300;
-    public float timeBeforeNextJump = 1.2f;
+    [SerializeField] private float movementSpeed = 3f;
+    [SerializeField] private float jumpForce = 300f;
+    [SerializeField] private float timeBeforeNextJump = 1.2f;
     private float canJump = 0f;
     Animator anim;
     Rigidbody rb;
-    
+    Vector3 movement;
     void Start()
     {
-        anim = GetComponent<Animator>();
+        anim = GetComponent<Animator>(); //Кеширование
         rb = GetComponent<Rigidbody>();
     }
 
@@ -22,30 +22,31 @@ public class PlayerController : MonoBehaviour
     {
         ControllPlayer();
     }
-
+    void FixedUpdate()
+    {
+        rb.MovePosition(transform.position + movement * Time.deltaTime * movementSpeed);
+    }
     void ControllPlayer()
     {
+      
         float moveHorizontal = Input.GetAxisRaw("Horizontal");
-        float moveVertical = Input.GetAxisRaw("Vertical");
 
-        Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
-
+        movement = new Vector3(moveHorizontal, 0.0f, 0.0f);
         if (movement != Vector3.zero)
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(movement), 0.15f);
             anim.SetInteger("Walk", 1);
         }
-        else {
+        else
+        {
             anim.SetInteger("Walk", 0);
         }
-
-        transform.Translate(movement * movementSpeed * Time.deltaTime, Space.World);
+        
 
         if (Input.GetButtonDown("Jump") && Time.time > canJump)
         {
-                rb.AddForce(0, jumpForce, 0);
-                canJump = Time.time + timeBeforeNextJump;
-                anim.SetTrigger("jump");
+            rb.AddForce(0, jumpForce, 0);
+            canJump = Time.time + timeBeforeNextJump;
+            anim.SetTrigger("jump");
         }
     }
 }
